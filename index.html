@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全密码生成器</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-950 font-sans text-slate-300 flex items-center justify-center min-h-screen p-4 sm:p-6">
+
+    <main class="w-full max-w-md mx-auto space-y-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-white mb-2">安全密码生成器</h1>
+            <p class="text-slate-400">创建强大且安全的密码来保护您的在线账户。</p>
+        </div>
+
+        <!-- Result -->
+        <div class="space-y-4">
+            <div class="relative">
+                <input type="text" id="password-output" readonly class="bg-slate-900 border border-slate-700 text-white text-xl rounded-lg block w-full p-4 pr-12 font-mono tracking-wider text-center" value="正在生成...">
+                <button id="copy-button" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-white transition-colors duration-200" aria-label="复制密码">
+                    <i data-lucide="clipboard" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
+                <h3 class="text-sm font-semibold text-white mb-3 text-center">强度分析</h3>
+                <div class="flex justify-around items-baseline">
+                    <div class="text-center">
+                        <span class="text-xs text-slate-400 block">密码熵</span>
+                        <span id="entropy-display" class="font-semibold text-white text-lg">-- bits</span>
+                    </div>
+                     <div class="text-center">
+                        <span class="text-xs text-slate-400 block">预估破解时间</span>
+                        <span id="crack-time-display" class="font-semibold text-emerald-400 text-lg">--</span>
+                    </div>
+                </div>
+            </div>
+             <p id="strength-error" class="text-red-500 text-center mt-2 text-sm h-5"></p>
+        </div>
+        
+        <!-- Generate Button -->
+        <button id="generate-button" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-all duration-200 transform active:scale-95 flex items-center justify-center gap-2">
+            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+            生成新密码
+        </button>
+
+        <!-- Controls -->
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-6 space-y-6">
+            <h2 class="text-xl font-bold text-white text-center mb-4">自定义选项</h2>
+            
+            <!-- Password Length -->
+            <div>
+                <label for="length-slider" class="block text-sm font-medium text-slate-300 mb-2">密码长度: <span id="length-display" class="font-bold text-white">16</span></label>
+                <div class="flex items-center space-x-4">
+                    <input type="range" id="length-slider" min="8" max="128" value="16" class="w-full">
+                    <input type="number" id="length-input" min="8" max="128" value="16" class="w-20 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2.5 text-center">
+                </div>
+            </div>
+
+            <!-- Character Types -->
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-3">包含字符类型</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex items-center p-2 rounded-md bg-slate-800/50">
+                        <input id="include-uppercase" type="checkbox" checked>
+                        <label for="include-uppercase" class="ml-3 text-sm text-slate-200 select-none">大写字母 (A-Z)</label>
+                    </div>
+                    <div class="flex items-center p-2 rounded-md bg-slate-800/50">
+                        <input id="include-lowercase" type="checkbox" checked>
+                        <label for="include-lowercase" class="ml-3 text-sm text-slate-200 select-none">小写字母 (a-z)</label>
+                    </div>
+                    <div class="flex items-center p-2 rounded-md bg-slate-800/50">
+                        <input id="include-numbers" type="checkbox" checked>
+                        <label for="include-numbers" class="ml-3 text-sm text-slate-200 select-none">数字 (0-9)</label>
+                    </div>
+                    <div class="flex items-center p-2 rounded-md bg-slate-800/50">
+                        <input id="include-special" type="checkbox" checked>
+                        <label for="include-special" class="ml-3 text-sm text-slate-200 select-none">特殊字符 (!@#...)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- First Character Type -->
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-3">首位字符类型</label>
+                <div class="flex items-center justify-around bg-slate-800/50 rounded-lg p-2">
+                    <div class="flex items-center">
+                        <input id="first-char-any" name="first-char-type" type="radio" value="any" checked>
+                        <label for="first-char-any" class="ml-2 text-sm text-slate-200 select-none">任意</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="first-char-letter" name="first-char-type" type="radio" value="letter">
+                        <label for="first-char-letter" class="ml-2 text-sm text-slate-200 select-none">字母</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="first-char-number" name="first-char-type" type="radio" value="number">
+                        <label for="first-char-number" class="ml-2 text-sm text-slate-200 select-none">数字</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Exclusions -->
+            <div>
+                <label for="exclude-chars" class="block text-sm font-medium text-slate-300 mb-2">排除易混淆字符</label>
+                <input type="text" id="exclude-chars" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5" placeholder="例如: O0Il">
+                 <div class="flex items-center mt-3">
+                    <input id="exclude-problem-chars" type="checkbox">
+                    <label for="exclude-problem-chars" class="ml-3 text-sm text-slate-200 select-none">排除常见问题字符 (e.g. `Il|O0`) </label>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center text-xs text-slate-600 pb-4">
+            <p>* 破解时间基于每秒 10¹² 次猜测的离线攻击假设。</p>
+        </footer>
+    </main>
+    
+    <script type="module" src="main.js"></script>
+</body>
+</html>
